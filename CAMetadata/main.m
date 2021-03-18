@@ -2,11 +2,27 @@
 //  main.m
 //  CAMetadata
 //
-//  Created by Panayotis Matsinopoulos on 18/3/21.
+//  Created by Panagiotis Matsinopoulos on 18/3/21.
 //
 
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
+
+void GetAudioFileInformationProperty(AudioFileID audioFile, CFDictionaryRef *dictionary) {
+  OSStatus theErr = noErr;
+  UInt32 dictionarySize = 0;
+  theErr = AudioFileGetPropertyInfo(audioFile,
+                                    kAudioFilePropertyInfoDictionary,
+                                    &dictionarySize,
+                                    0);
+  assert(theErr == noErr);
+  
+  theErr = AudioFileGetProperty(audioFile,
+                                kAudioFilePropertyInfoDictionary,
+                                &dictionarySize,
+                                dictionary);
+  assert(theErr == noErr);
+}
 
 int main(int argc, const char * argv[]) {
   @autoreleasepool {
@@ -26,22 +42,13 @@ int main(int argc, const char * argv[]) {
                               0,
                               &audioFile);
     assert(theErr == noErr);
-    
-    UInt32 dictionarySize = 0;
-    theErr = AudioFileGetPropertyInfo(audioFile,
-                                      kAudioFilePropertyInfoDictionary,
-                                      &dictionarySize,
-                                      0);
-    assert(theErr == noErr);
-    
+        
     CFDictionaryRef dictionary;
-    theErr = AudioFileGetProperty(audioFile,
-                                  kAudioFilePropertyInfoDictionary,
-                                  &dictionarySize,
-                                  &dictionary);
-    assert(theErr == noErr);
+    
+    GetAudioFileInformationProperty(audioFile, &dictionary);
     
     NSLog(@"dictionary: %@", dictionary);
+    
     CFRelease(dictionary);
     
     theErr = AudioFileClose(audioFile);
